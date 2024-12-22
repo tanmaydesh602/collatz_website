@@ -10,6 +10,7 @@ def collatz_sequence(n):
         else:
             n=3*n+1
         sequence.append(n)
+    return sequence
 
 def create_app(test_config=None):
     # create and configure the app
@@ -36,14 +37,12 @@ def create_app(test_config=None):
     def collatz():
         result = None
         if request.method == "POST":
-            try:
-                number = int(request.form["number"])
-                if number < 1:
-                    result = "Please enter a positive integer."
-                else:
-                    result = collatz_sequence(number)
-            except ValueError:
-                result = "Invalid input. Please enter an integer."
+            print(request.form)
+            number = int(request.form["number"])
+            if number < 1:
+                result = "Please enter a positive integer."
+            else:
+                result = collatz_sequence(number)
         return render_template("index.html", result=result)
     
     return app
