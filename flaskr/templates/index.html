@@ -19,6 +19,7 @@
             <p>{{ result }}</p>
         {% else %}
             <p>Sequence: {{ result | join(", ") }}</p>
+            <p>Sequence Length: {{ sequence_length }}</p>
         {% endif %}
     {% endif %}
 </body>

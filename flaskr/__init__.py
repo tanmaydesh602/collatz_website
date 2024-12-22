@@ -36,6 +36,7 @@ def create_app(test_config=None):
     @app.route("/", methods=["GET", "POST"])
     def collatz():
         result = None
+        sequence_length = None
         if request.method == "POST":
             print(request.form)
             number = int(request.form["number"])
@@ -43,6 +44,7 @@ def create_app(test_config=None):
                 result = "Please enter a positive integer."
             else:
                 result = collatz_sequence(number)
-        return render_template("index.html", result=result)
+                sequence_length = len(result)
+        return render_template("index.html", result=result, sequence_length=sequence_length)
     
     return app
