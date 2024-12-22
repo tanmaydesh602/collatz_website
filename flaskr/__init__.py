@@ -33,12 +33,15 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    @app.route("/", methods=["GET", "POST"])
+    @app.route("/", methods=["GET"])
+    def homepage():
+        return render_template("homepage.html")
+
+    @app.route("/sequence", methods=["GET", "POST"])
     def collatz():
         result = None
         sequence_length = None
         if request.method == "POST":
-            print(request.form)
             number = int(request.form["number"])
             if number < 1:
                 result = "Please enter a positive integer."
