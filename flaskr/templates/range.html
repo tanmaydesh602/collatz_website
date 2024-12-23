@@ -26,6 +26,10 @@
         <p>The number with the maximum Collatz sequence length is {{ max_number }} with a length of {{ max_length }}.</p>
         <p>The number with the minimum Collatz sequence length is {{ min_number }} with a length of {{ min_length }}.</p>
     {% endif %}
+    {% if graph_url %}
+        <h2>Graph:</h2>
+        <img src="data:image/png;base64,{{ graph_url }}" alt="Collatz Graph">
+    {% endif %}
     <p>
         <a href="/">Back Home</a>
     </p>

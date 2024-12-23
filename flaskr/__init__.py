@@ -1,6 +1,10 @@
 import os
-from functools import lru_cache
 from flask import Flask, render_template, request
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import io
+import base64
 
 def collatz_sequence(n):
     sequence = [n]
@@ -12,14 +16,19 @@ def collatz_sequence(n):
         sequence.append(n)
     return sequence
 
-@lru_cache(maxsize=None)
+collatz_cache = {}
 def collatz_length(n):
+    if n in collatz_cache:
+        return collatz_cache[n]
+
     if n == 1:
-        return 1
-    if n % 2 == 0:
-        return 1 + collatz_length(n // 2)
+        collatz_cache[n] = 1
+    elif n % 2 == 0:
+        collatz_cache[n] = 1 + collatz_length(n // 2)
     else:
-        return 1 + collatz_length(3 * n + 1)
+        collatz_cache[n] = 1 + collatz_length(3 * n + 1)
+
+    return collatz_cache[n]
 
 def create_app(test_config=None):
     # create and configure the app
@@ -68,25 +77,44 @@ def create_app(test_config=None):
         min_number = None
         min_length = None
         error = None
+        graph_url = None
+
         if request.method == "POST":
             try:
                 start = int(request.form["start"])
                 end = int(request.form["end"])
+
                 if start < 1 or end < 1:
                     error = "Both numbers must be positive integers."
                 elif start > end:
                     error = "The start number must be less than or equal to the end number."
                 else:
+                    lengths = []
+                    numbers = list(range(start,end+1))
                     max_length = 0
                     min_length = float("inf")
-                    for number in range(start, end + 1):
+                    for number in numbers:
                         length = collatz_length(number)
+                        lengths.append(length)
                         if length > max_length:
                             max_length = length
                             max_number = number
                         if length < min_length:
                             min_length = length
                             min_number = number
+                    
+                    plt.figure(figsize=(10, 6))
+                    plt.bar(numbers, lengths, color="skyblue")
+                    plt.xlabel("Number")
+                    plt.ylabel("Collatz Sequence Length")
+                    plt.title(f"Collatz Sequence Lengths for Numbers {start} to {end}")
+                    plt.tight_layout()
+
+                    img = io.BytesIO()
+                    plt.savefig(img, format="png")
+                    img.seek(0)
+                    graph_url = base64.b64encode(img.getvalue()).decode()
+                    plt.close()
             except ValueError:
                 error = "Invalid input. Please enter positive integers."
         return render_template("range.html",
@@ -94,6 +122,7 @@ def create_app(test_config=None):
             max_length=max_length,
             min_number=min_number,
             min_length=min_length,
-            error=error,)
+            error=error, 
+            graph_url=graph_url)
     
     return app
